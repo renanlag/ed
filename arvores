@@ -1,0 +1,277 @@
+import 'package:flutter/material.dart';
+
+class Arvore extends StatefulWidget {
+  @override
+  _ArvoreState createState() => _ArvoreState();
+}
+
+class _ArvoreState extends State<Arvore> {
+
+  GlobalKey<FormState> _formKey = GlobalKey<FormState>();
+
+  final _arvoreController = TextEditingController();
+
+  AVL _arvore;
+  List _arvores = [];
+
+  void _addArvore(){
+    setState(() {
+      _arvore.insere(int.parse(_arvoreController.text));
+      _arvoreController.text = "";
+    });
+  }
+
+
+
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+        appBar: AppBar(
+          title: Text("Arvore"),
+          backgroundColor: Colors.blueAccent,
+          centerTitle: true,
+        ),
+        backgroundColor: Colors.white,
+        floatingActionButton: FloatingActionButton(
+          onPressed: (){
+            
+          },
+          child: Icon(Icons.remove),
+          backgroundColor: Colors.blueAccent,
+        ),
+        body: Form(
+          key: _formKey,
+          child: Column(
+            children: <Widget>[
+              Container(
+                padding: EdgeInsets.all(10.0),
+                child: Row(
+                  children: <Widget>[
+                    Expanded(
+                      child: TextFormField(
+                        keyboardType: TextInputType.number,
+                        controller: _arvoreController,
+                        decoration: InputDecoration(
+                            labelText: "Novo Elemento",
+                            labelStyle: TextStyle(color: Colors.blueAccent)
+                        ),
+                        validator: (value){
+                          if(value.isEmpty){
+                            return "Insira um valor!";
+                          }
+                        },
+                      ),
+                    ),
+                    RaisedButton(
+                      color: Colors.blueAccent,
+                      child: Text("ADD"),
+                      textColor: Colors.white,
+                      onPressed: (){
+                        if(_formKey.currentState.validate()){
+                          _addArvore();
+                        }
+                      },
+                    )
+                  ],
+                ),
+              ),
+              Expanded(
+                child:  ListView(
+                  padding: EdgeInsets.only(top: 10.0),
+                  children: <Widget>[
+                ListTile(
+                title: Text(_arvore.exibir(),
+                style: TextStyle(
+                    fontSize: 25.0, color: Colors.blueAccent
+                 ),
+                ),
+              )
+                  ],
+
+                ),
+              ),
+            ],
+          ),
+        )
+    );
+  }
+}
+
+class No{
+  int conteudo;
+  No esq;
+  No dir;
+
+  No(){
+    esq = null;
+    dir = null;
+  }
+}
+
+class ArvBinaria{
+  No raiz;
+
+  ArvBinaria(){
+    raiz = null;
+  }
+
+  bool _vazia(){
+    return raiz == null;
+  }
+
+  No busca(No t, int valor){
+    No aux;
+
+    if(t == null){
+      return null;
+    }
+    if(t.conteudo == valor){
+      return t;
+    }
+    aux = busca(t.esq, valor);
+    if(aux == null){
+      aux = busca(t.dir, valor);
+      return aux;
+    }
+  }
+  No buscaValor(int valor){
+    if(_vazia()){
+      return null;
+    }
+    return busca(raiz, valor);
+  }
+
+  bool insereRaiz(int valor){
+    if(raiz != null){
+      return false;
+    }
+    No novoNo;
+    novoNo.dir = null;
+    novoNo.esq = null;
+
+    raiz = novoNo;
+    return true;
+  }
+
+  bool insereDir(int Vpai, int Vfilho){
+    No filho = buscaValor(Vfilho);
+    if (filho != null){
+      return false;
+    }
+    No pai = buscaValor(Vpai);
+    if(pai == null){
+      return false;
+    }
+    if (pai.dir != null){
+      return false;
+    }
+
+    No novoNo;
+    novoNo.conteudo = Vfilho;
+    novoNo.dir = null;
+    novoNo.esq = null;
+
+    pai.dir = novoNo;
+    return true;
+  }
+
+  bool insereEsq(int Vpai, int Vfilho){
+    No filho = buscaValor(Vfilho);
+    if (filho != null){
+      return false;
+    }
+    No pai = buscaValor(Vpai);
+    if(pai == null){
+      return false;
+    }
+    if (pai.esq != null){
+      return false;
+    }
+
+    No novoNo;
+    novoNo.conteudo = Vfilho;
+    novoNo.dir = null;
+    novoNo.esq = null;
+
+    pai.esq = novoNo;
+    return true;
+  }
+}
+
+class AVL{
+  No raiz;
+
+  AVL(){
+    raiz = null;
+  }
+
+  No busca(No t, int valor){
+    if(t == null){
+      return null;
+    }
+    if(t.conteudo == valor){
+      return t;
+    }
+    if(valor < t.conteudo){
+      return busca(t.esq, valor);
+    }else{
+      return busca(t.dir, valor);
+    }
+  }
+
+  No buscarValor(int valor){
+    if(raiz != null){
+      return busca(raiz, valor);
+    }
+    return null;
+  }
+
+  void exibe(No t){
+    if(t != null){
+      exibe(t.esq);
+      print(t.esq);
+      exibe(t.dir);
+    }
+  }
+
+  void exibir(){
+    if(raiz == null){
+      print("Arvore Vazia");
+    }else{
+      exibe(raiz);
+    }
+  }
+
+  bool insere(int valor){
+    No novoNo;
+    novoNo.conteudo = valor;
+    novoNo.dir = null;
+    novoNo.esq = null;
+
+    if(raiz == null){
+      raiz = novoNo;
+      return true;
+    }
+
+    No aux = raiz;
+    No p = null;
+
+    while(aux != null){
+      p = aux;
+      if(valor < aux.conteudo){
+        aux = aux.esq;
+      }else{
+        aux = aux.dir;
+      }
+    }
+
+    if(valor < p.conteudo){
+      p.esq = novoNo;
+    }else{
+      p.dir = novoNo;
+    }
+
+    return true;
+  }
+}
